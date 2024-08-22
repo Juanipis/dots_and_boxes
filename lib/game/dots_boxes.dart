@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 class DotsAndBoxesBoard extends StatefulWidget {
   final int rows;
   final int columns;
+  final Function(int player, int points) onScoreUpdate;
 
-  const DotsAndBoxesBoard(
-      {super.key, required this.rows, required this.columns});
+  const DotsAndBoxesBoard({
+    super.key,
+    required this.rows,
+    required this.columns,
+    required this.onScoreUpdate,
+  });
 
   @override
   State<DotsAndBoxesBoard> createState() => _DotsAndBoxesBoardState();
@@ -144,25 +149,34 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
 
   bool _checkBoxCompletion(int row, int col, bool isHorizontal) {
     bool completed = false;
+    int pointsScored = 0;
 
     if (isHorizontal) {
       if (row > 0 && _isBoxComplete(row - 1, col)) {
         boxes[row - 1][col] = currentPlayer;
         completed = true;
+        pointsScored++;
       }
       if (row < widget.rows && _isBoxComplete(row, col)) {
         boxes[row][col] = currentPlayer;
         completed = true;
+        pointsScored++;
       }
     } else {
       if (col > 0 && _isBoxComplete(row, col - 1)) {
         boxes[row][col - 1] = currentPlayer;
         completed = true;
+        pointsScored++;
       }
       if (col < widget.columns && _isBoxComplete(row, col)) {
         boxes[row][col] = currentPlayer;
         completed = true;
+        pointsScored++;
       }
+    }
+
+    if (pointsScored > 0) {
+      widget.onScoreUpdate(currentPlayer, pointsScored);
     }
 
     return completed;
