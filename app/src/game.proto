@@ -10,6 +10,8 @@ message GameSetup {
   int32 cols = 2;
   int32 level = 3;
   GameMove first_move = 4;
+  int32 difficulty = 5;
+  bool alfa_beta_prunning = 6;
 }
 
 message GameMove {
@@ -22,7 +24,7 @@ message GameMove {
 message MoveResponse {
   string status = 1;
   string message = 2;
-  GameMove next_move = 3;
+  repeated GameMove next_move = 3;
 }
 
 // Definición del servicio

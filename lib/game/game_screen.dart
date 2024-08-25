@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:dots_and_boxes/ai/service.dart';
 import 'package:dots_and_boxes/game/dots_boxes.dart';
 import 'package:flutter/material.dart';
@@ -6,12 +7,16 @@ class GameScreen extends StatefulWidget {
   final int rows;
   final int columns;
   final bool playAgainstAI;
+  final int difficulty;
+  final bool alfaBetaPruning;
 
   const GameScreen(
       {super.key,
       required this.rows,
       required this.columns,
-      required this.playAgainstAI});
+      required this.playAgainstAI,
+      required this.difficulty,
+      required this.alfaBetaPruning});
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -22,6 +27,10 @@ class _GameScreenState extends State<GameScreen> {
   late int player2Score;
   late int currentPlayer;
   GameClientService? gameService;
+  final player = AudioPlayer();
+  String winP1 = 'audio/win.wav';
+  String winP2 = 'audio/win2.wav';
+  String winAI = 'audio/lose.wav';
 
   @override
   void initState() {
@@ -42,21 +51,45 @@ class _GameScreenState extends State<GameScreen> {
         player2Score += points;
       }
 
-      if (player1Score + player2Score == widget.rows * widget.columns) {
+      int totalSquares = widget.rows * widget.columns;
+      int remainingSquares = totalSquares - (player1Score + player2Score);
+
+      // Calcular la puntuación máxima posible del otro jugador si tomara todos los cuadros restantes
+      int maxPossibleScoreForPlayer2 = player2Score + remainingSquares;
+      int maxPossibleScoreForPlayer1 = player1Score + remainingSquares;
+
+      if (player1Score > maxPossibleScoreForPlayer2 ||
+          player2Score > maxPossibleScoreForPlayer1) {
+        _showWinner();
+      } else if (player1Score + player2Score == totalSquares) {
         _showWinner();
       }
     });
   }
 
   void _showWinner() {
-    String winner = player1Score > player2Score ? "Player 1" : "Player 2";
+    String winner;
+    if (player1Score > player2Score) {
+      winner = widget.playAgainstAI ? "You win against AI!" : "Player 1 wins!";
+      player.play(AssetSource(winP1));
+    } else if (player2Score > player1Score) {
+      winner = widget.playAgainstAI ? "AI wins!" : "Player 2 wins!";
+      if (widget.playAgainstAI) {
+        player.play(AssetSource(winAI));
+      } else {
+        player.play(AssetSource(winP2));
+      }
+    } else {
+      winner = "It's a draw!";
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Game Over'),
-          content: Text('$winner wins!'),
+          content: Text(winner),
           actions: <Widget>[
             TextButton(
               child: const Text('Back to Home'),
@@ -100,6 +133,8 @@ class _GameScreenState extends State<GameScreen> {
               onScoreUpdate: _updateScore,
               playAgainstAI: widget.playAgainstAI,
               gameClientService: gameService,
+              difficulty: widget.difficulty,
+              alfaBetaPruning: widget.alfaBetaPruning,
             ),
           ),
         ],

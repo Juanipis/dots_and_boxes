@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ngame.proto\x12\x04game\"Z\n\tGameSetup\x12\x0c\n\x04rows\x18\x01 \x01(\x05\x12\x0c\n\x04\x63ols\x18\x02 \x01(\x05\x12\r\n\x05level\x18\x03 \x01(\x05\x12\"\n\nfirst_move\x18\x04 \x01(\x0b\x32\x0e.game.GameMove\"N\n\x08GameMove\x12\x10\n\x08origin_x\x18\x01 \x01(\x05\x12\x10\n\x08origin_y\x18\x02 \x01(\x05\x12\x0e\n\x06\x64\x65st_x\x18\x03 \x01(\x05\x12\x0e\n\x06\x64\x65st_y\x18\x04 \x01(\x05\"R\n\x0cMoveResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\x12!\n\tnext_move\x18\x03 \x01(\x0b\x32\x0e.game.GameMove2o\n\x0bGameService\x12\x30\n\tStartGame\x12\x0f.game.GameSetup\x1a\x12.game.MoveResponse\x12.\n\x08MakeMove\x12\x0e.game.GameMove\x1a\x12.game.MoveResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ngame.proto\x12\x04game\"\x8a\x01\n\tGameSetup\x12\x0c\n\x04rows\x18\x01 \x01(\x05\x12\x0c\n\x04\x63ols\x18\x02 \x01(\x05\x12\r\n\x05level\x18\x03 \x01(\x05\x12\"\n\nfirst_move\x18\x04 \x01(\x0b\x32\x0e.game.GameMove\x12\x12\n\ndifficulty\x18\x05 \x01(\x05\x12\x1a\n\x12\x61lfa_beta_prunning\x18\x06 \x01(\x08\"N\n\x08GameMove\x12\x10\n\x08origin_x\x18\x01 \x01(\x05\x12\x10\n\x08origin_y\x18\x02 \x01(\x05\x12\x0e\n\x06\x64\x65st_x\x18\x03 \x01(\x05\x12\x0e\n\x06\x64\x65st_y\x18\x04 \x01(\x05\"R\n\x0cMoveResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\x12!\n\tnext_move\x18\x03 \x03(\x0b\x32\x0e.game.GameMove2o\n\x0bGameService\x12\x30\n\tStartGame\x12\x0f.game.GameSetup\x1a\x12.game.MoveResponse\x12.\n\x08MakeMove\x12\x0e.game.GameMove\x1a\x12.game.MoveResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -21,12 +21,12 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'game_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _globals['_GAMESETUP']._serialized_start=20
-  _globals['_GAMESETUP']._serialized_end=110
-  _globals['_GAMEMOVE']._serialized_start=112
-  _globals['_GAMEMOVE']._serialized_end=190
-  _globals['_MOVERESPONSE']._serialized_start=192
-  _globals['_MOVERESPONSE']._serialized_end=274
-  _globals['_GAMESERVICE']._serialized_start=276
-  _globals['_GAMESERVICE']._serialized_end=387
+  _globals['_GAMESETUP']._serialized_start=21
+  _globals['_GAMESETUP']._serialized_end=159
+  _globals['_GAMEMOVE']._serialized_start=161
+  _globals['_GAMEMOVE']._serialized_end=239
+  _globals['_MOVERESPONSE']._serialized_start=241
+  _globals['_MOVERESPONSE']._serialized_end=323
+  _globals['_GAMESERVICE']._serialized_start=325
+  _globals['_GAMESERVICE']._serialized_end=436
 # @@protoc_insertion_point(module_scope)

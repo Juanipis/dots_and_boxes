@@ -18,13 +18,14 @@ class GameClientService {
     return await stub.makeMove(move);
   }
 
-  Future<MoveResponse> initializeGame(
-      int rows, int cols, int level, GameMove firstMove) async {
+  Future<MoveResponse> initializeGame(int rows, int cols, int level,
+      GameMove firstMove, bool alfaBetaPrunning) async {
     final gameSetup = GameSetup(
       rows: rows,
       cols: cols,
       level: level,
       firstMove: firstMove,
+      alfaBetaPrunning: alfaBetaPrunning,
     );
     return await stub.startGame(gameSetup);
   }

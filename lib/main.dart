@@ -28,9 +28,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int rows = 5;
-  int columns = 5;
+  int rows = 3;
+  int columns = 3;
   bool playAgainstAI = false;
+  int difficulty = 3;
+  bool alfaBetaPruning = false;
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +104,43 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+            if (playAgainstAI)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Difficulty: '),
+                  DropdownButton<int>(
+                    value: difficulty,
+                    items: [1, 2, 3, 4, 5].map((int value) {
+                      return DropdownMenuItem<int>(
+                        value: value,
+                        child: Text(value.toString()),
+                      );
+                    }).toList(),
+                    onChanged: (int? newValue) {
+                      setState(() {
+                        difficulty = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            if (playAgainstAI)
+              // A Swithc to turn alfa-beta pruning on or off
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Alfa-Beta Pruning: '),
+                  Switch(
+                    value: alfaBetaPruning,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        alfaBetaPruning = newValue;
+                      });
+                    },
+                  ),
+                ],
+              ),
             const SizedBox(height: 20),
             ElevatedButton(
               child: const Text('Start Game'),
@@ -113,6 +152,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       rows: rows,
                       columns: columns,
                       playAgainstAI: playAgainstAI,
+                      difficulty: difficulty,
+                      alfaBetaPruning: alfaBetaPruning,
                     ),
                   ),
                 );

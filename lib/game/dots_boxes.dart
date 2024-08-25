@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:dots_and_boxes/ai/service.dart';
 import 'package:dots_and_boxes/src/generated/game.pb.dart';
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class DotsAndBoxesBoard extends StatefulWidget {
   final int rows;
@@ -10,6 +11,8 @@ class DotsAndBoxesBoard extends StatefulWidget {
   final Function(int player, int points) onScoreUpdate;
   final bool playAgainstAI;
   final GameClientService? gameClientService;
+  final int difficulty;
+  final bool alfaBetaPruning;
 
   const DotsAndBoxesBoard({
     super.key,
@@ -18,6 +21,8 @@ class DotsAndBoxesBoard extends StatefulWidget {
     required this.onScoreUpdate,
     this.playAgainstAI = false,
     this.gameClientService,
+    required this.difficulty,
+    required this.alfaBetaPruning,
   });
 
   @override
@@ -31,6 +36,10 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
   int currentPlayer = 1;
   bool isGameInitialized = false;
   bool isAIProcessing = false;
+  final player = AudioPlayer();
+  String p1_sound = 'audio/p1.wav';
+  String p2_sound = 'audio/p2.wav';
+  String ai_sound = 'audio/ai.wav';
 
   // Definimos los colores de los jugadores
   final Color player1Color = Colors.blue;
@@ -157,6 +166,11 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
       }
 
       bool boxCompleted = _checkBoxCompletion(row, col, isHorizontal);
+      if (currentPlayer == 1) {
+        playP1Sound();
+      } else {
+        playP2Sound();
+      }
       if (!boxCompleted) {
         currentPlayer = 3 - currentPlayer; // Cambia entre 1 y 2
       }
@@ -178,12 +192,13 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
       setState(() {
         isAIProcessing = true;
       });
+      await Future.delayed(const Duration(milliseconds: 500));
       if (!isGameInitialized) {
         await _initializeAIGame(originX, originY, destX, destY);
         setState(() {
           isAIProcessing = false;
         });
-      } else if (currentPlayer == 2) {
+      } else {
         await _makeAIMove(originX, originY, destX, destY);
         setState(() {
           isAIProcessing = false;
@@ -200,15 +215,24 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
 
     try {
       final response = await widget.gameClientService!.initializeGame(
-        widget.rows,
-        widget.columns,
-        3, // Nivel de dificultad, puedes ajustarlo según sea necesario
-        firstMove,
-      );
+          widget.rows,
+          widget.columns,
+          widget
+              .difficulty, // Nivel de dificultad, puedes ajustarlo según sea necesario
+          firstMove,
+          widget.alfaBetaPruning);
 
       if (response.status == 'continue') {
         isGameInitialized = true;
-        _applyAIMove(response.nextMove);
+        final moves = response.nextMove;
+        //iterar sobre los movimientos de la IA
+        for (var aiMove in moves) {
+          playAiSound();
+          _applyAIMove(aiMove);
+        }
+        setState(() {
+          currentPlayer = 1;
+        });
       } else if (response.status == 'game_over') {
         // Manejar el fin del juego
       }
@@ -225,8 +249,26 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
 
     try {
       final response = await widget.gameClientService!.makeMove(move);
+
       if (response.status == 'continue') {
-        _applyAIMove(response.nextMove);
+        // Pueden haber multiples movimientos de la IA antes de que el juego termine
+        final moves = response.nextMove;
+        //iterar sobre los movimientos de la IA
+        if (moves.isEmpty) {
+          setState(() {
+            currentPlayer = 1;
+          });
+          return;
+        }
+        for (var aiMove in moves) {
+          _applyAIMove(aiMove);
+          playAiSound();
+          // Esperar un poco antes de hacer el siguiente movimiento
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+        setState(() {
+          currentPlayer = 1;
+        });
       } else if (response.status == 'game_over') {
         // Manejar el fin del juego
       }
@@ -257,10 +299,6 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
 
       // Verificar si la adición de esta línea completa una caja
       bool boxCompleted = _checkBoxCompletion(row, col, isHorizontal);
-      if (!boxCompleted) {
-        currentPlayer =
-            1; // Cambiar el turno al jugador humano si no se completa una caja
-      }
     });
   }
 
@@ -304,5 +342,17 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
         horizontalLines[row + 1][col] != 0 &&
         verticalLines[row][col] != 0 &&
         verticalLines[row][col + 1] != 0;
+  }
+
+  Future<void> playP1Sound() async {
+    await player.play(AssetSource(p1_sound));
+  }
+
+  Future<void> playP2Sound() async {
+    await player.play(AssetSource(p2_sound));
+  }
+
+  Future<void> playAiSound() async {
+    await player.play(AssetSource(ai_sound));
   }
 }

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from .board import Board
 from copy import deepcopy
 import random
@@ -41,30 +41,40 @@ class GameManager:
 
     def get_move(
         self, origin, dest
-    ) -> tuple[Optional[tuple[tuple[int, int], tuple[int, int]]], Optional[str]]:
-        # if origin[0] > dest[0] or origin[1] > dest[1]:
-        #     origin, dest = dest, origin
+    ) -> tuple[Optional[Union[list[tuple[int, int]], tuple[int, int]]], Optional[str]]:  # noqa: F821
+        ai_moves = []
+        # Inicialmente obtenemos el movimiento del jugador.
         coordinates = (origin, dest)
-        # print("entered move=", coordinates)
-
         valid_move = self._board.move(coordinates, player_move=True)
-
-        # self._board.move(coordinates, player_move = True)
-
+        # Un movimiento valido es aquel que obtiene puntos como rellenar un cuadro.
         if valid_move is None:
+            # Si el movimiento no es válido, la IA hace su movimiento.
             board = deepcopy(self._board)
-            next = self._mode(board, self._level, True)
-            # print("next move", next[1])
-            self._board.move(next[1])
-            if not self._board.has_moves():
-                return (next[1], self.get_victor())
+            next_move = self._mode(board, self._level, True)
+            ai_moves.append(next_move[1])
 
-            return (next[1], None)
+            ai_initial_score = self._board.ai_score
+            self._board.move(next_move[1])
+
+            # Mientras la IA obtenga puntos, seguirá jugando.
+            while self._board.has_moves() and self._board.ai_score > ai_initial_score:
+                ai_initial_score = (
+                    self._board.ai_score
+                )  # Actualizar la puntuación inicial
+                next_move = self._mode(board, self._level, True)
+                ai_moves.append(next_move[1])
+                self._board.move(next_move[1])
+
+            # Si no hay más movimientos, determinar el ganador.
+            if not self._board.has_moves():
+                return (next_move[1], self.get_victor())
+            # Se devuelven todos los movimientos de la IA.
+            return (ai_moves, None)
         elif valid_move:
+            # Si el jugador hizo un movimiento válido y no hay más movimientos, determinar el ganador.
             if not self._board.has_moves():
                 return (None, self.get_victor())
-
-            print("player got point, plays again")
+            print("Player got point, plays again")
         else:
             print("Invalid player move")
 

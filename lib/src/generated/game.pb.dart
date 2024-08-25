@@ -20,6 +20,8 @@ class GameSetup extends $pb.GeneratedMessage {
     $core.int? cols,
     $core.int? level,
     GameMove? firstMove,
+    $core.int? difficulty,
+    $core.bool? alfaBetaPrunning,
   }) {
     final $result = create();
     if (rows != null) {
@@ -34,6 +36,12 @@ class GameSetup extends $pb.GeneratedMessage {
     if (firstMove != null) {
       $result.firstMove = firstMove;
     }
+    if (difficulty != null) {
+      $result.difficulty = difficulty;
+    }
+    if (alfaBetaPrunning != null) {
+      $result.alfaBetaPrunning = alfaBetaPrunning;
+    }
     return $result;
   }
   GameSetup._() : super();
@@ -45,6 +53,8 @@ class GameSetup extends $pb.GeneratedMessage {
     ..a<$core.int>(2, _omitFieldNames ? '' : 'cols', $pb.PbFieldType.O3)
     ..a<$core.int>(3, _omitFieldNames ? '' : 'level', $pb.PbFieldType.O3)
     ..aOM<GameMove>(4, _omitFieldNames ? '' : 'firstMove', subBuilder: GameMove.create)
+    ..a<$core.int>(5, _omitFieldNames ? '' : 'difficulty', $pb.PbFieldType.O3)
+    ..aOB(6, _omitFieldNames ? '' : 'alfaBetaPrunning')
     ..hasRequiredFields = false
   ;
 
@@ -106,6 +116,24 @@ class GameSetup extends $pb.GeneratedMessage {
   void clearFirstMove() => clearField(4);
   @$pb.TagNumber(4)
   GameMove ensureFirstMove() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $core.int get difficulty => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set difficulty($core.int v) { $_setSignedInt32(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasDifficulty() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearDifficulty() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.bool get alfaBetaPrunning => $_getBF(5);
+  @$pb.TagNumber(6)
+  set alfaBetaPrunning($core.bool v) { $_setBool(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasAlfaBetaPrunning() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearAlfaBetaPrunning() => clearField(6);
 }
 
 class GameMove extends $pb.GeneratedMessage {
@@ -204,7 +232,7 @@ class MoveResponse extends $pb.GeneratedMessage {
   factory MoveResponse({
     $core.String? status,
     $core.String? message,
-    GameMove? nextMove,
+    $core.Iterable<GameMove>? nextMove,
   }) {
     final $result = create();
     if (status != null) {
@@ -214,7 +242,7 @@ class MoveResponse extends $pb.GeneratedMessage {
       $result.message = message;
     }
     if (nextMove != null) {
-      $result.nextMove = nextMove;
+      $result.nextMove.addAll(nextMove);
     }
     return $result;
   }
@@ -225,7 +253,7 @@ class MoveResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'MoveResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'game'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'status')
     ..aOS(2, _omitFieldNames ? '' : 'message')
-    ..aOM<GameMove>(3, _omitFieldNames ? '' : 'nextMove', subBuilder: GameMove.create)
+    ..pc<GameMove>(3, _omitFieldNames ? '' : 'nextMove', $pb.PbFieldType.PM, subBuilder: GameMove.create)
     ..hasRequiredFields = false
   ;
 
@@ -269,15 +297,7 @@ class MoveResponse extends $pb.GeneratedMessage {
   void clearMessage() => clearField(2);
 
   @$pb.TagNumber(3)
-  GameMove get nextMove => $_getN(2);
-  @$pb.TagNumber(3)
-  set nextMove(GameMove v) { setField(3, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasNextMove() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearNextMove() => clearField(3);
-  @$pb.TagNumber(3)
-  GameMove ensureNextMove() => $_ensure(2);
+  $core.List<GameMove> get nextMove => $_getList(2);
 }
 
 

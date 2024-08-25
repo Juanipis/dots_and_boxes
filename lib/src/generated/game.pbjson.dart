@@ -21,6 +21,8 @@ const GameSetup$json = {
     {'1': 'cols', '3': 2, '4': 1, '5': 5, '10': 'cols'},
     {'1': 'level', '3': 3, '4': 1, '5': 5, '10': 'level'},
     {'1': 'first_move', '3': 4, '4': 1, '5': 11, '6': '.game.GameMove', '10': 'firstMove'},
+    {'1': 'difficulty', '3': 5, '4': 1, '5': 5, '10': 'difficulty'},
+    {'1': 'alfa_beta_prunning', '3': 6, '4': 1, '5': 8, '10': 'alfaBetaPrunning'},
   ],
 };
 
@@ -28,7 +30,8 @@ const GameSetup$json = {
 final $typed_data.Uint8List gameSetupDescriptor = $convert.base64Decode(
     'CglHYW1lU2V0dXASEgoEcm93cxgBIAEoBVIEcm93cxISCgRjb2xzGAIgASgFUgRjb2xzEhQKBW'
     'xldmVsGAMgASgFUgVsZXZlbBItCgpmaXJzdF9tb3ZlGAQgASgLMg4uZ2FtZS5HYW1lTW92ZVIJ'
-    'Zmlyc3RNb3Zl');
+    'Zmlyc3RNb3ZlEh4KCmRpZmZpY3VsdHkYBSABKAVSCmRpZmZpY3VsdHkSLAoSYWxmYV9iZXRhX3'
+    'BydW5uaW5nGAYgASgIUhBhbGZhQmV0YVBydW5uaW5n');
 
 @$core.Deprecated('Use gameMoveDescriptor instead')
 const GameMove$json = {
@@ -52,12 +55,12 @@ const MoveResponse$json = {
   '2': [
     {'1': 'status', '3': 1, '4': 1, '5': 9, '10': 'status'},
     {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
-    {'1': 'next_move', '3': 3, '4': 1, '5': 11, '6': '.game.GameMove', '10': 'nextMove'},
+    {'1': 'next_move', '3': 3, '4': 3, '5': 11, '6': '.game.GameMove', '10': 'nextMove'},
   ],
 };
 
 /// Descriptor for `MoveResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List moveResponseDescriptor = $convert.base64Decode(
     'CgxNb3ZlUmVzcG9uc2USFgoGc3RhdHVzGAEgASgJUgZzdGF0dXMSGAoHbWVzc2FnZRgCIAEoCV'
-    'IHbWVzc2FnZRIrCgluZXh0X21vdmUYAyABKAsyDi5nYW1lLkdhbWVNb3ZlUghuZXh0TW92ZQ==');
+    'IHbWVzc2FnZRIrCgluZXh0X21vdmUYAyADKAsyDi5nYW1lLkdhbWVNb3ZlUghuZXh0TW92ZQ==');
 
