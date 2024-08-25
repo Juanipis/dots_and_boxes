@@ -3,6 +3,7 @@ import grpc
 import game_pb2
 import game_pb2_grpc
 from utils.game_manager import GameManager
+from logzero import logger
 
 
 class GameService(game_pb2_grpc.GameServiceServicer):
@@ -10,6 +11,14 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         self.games = {}
 
     def StartGame(self, request, context):
+        # Revisar si el juego ya existe, si es así, se elimina
+
+        if context.peer() in self.games:
+            logger.info(f"Juego {context.peer()} ya existe, se eliminará")
+            del self.games[context.peer()]
+        else:
+            logger.info(f"Juego {context.peer()} creado")
+
         game_id = context.peer()
         game = GameManager(request.rows, request.cols, request.level)
         self.games[game_id] = game
@@ -25,6 +34,11 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         else:
             status = "continue"
             message = f"Movimiento de la máquina: {move_result[0]}"
+
+        print(f"Movimiento del jugador: {origin} -> {dest}")
+        print(f"Movimiento de la máquina: {move_result[0]}")
+        print(f"Resultado del movimiento: {move_result}")
+        print(game._board.display_board())
 
         next_move = (
             game_pb2.GameMove(
@@ -55,6 +69,10 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         else:
             status = "continue"
             message = "Movimiento de la máquina: {}".format(move_result[0])
+        print(f"Movimiento del jugador: {origin} -> {dest}")
+        print(f"Movimiento de la máquina: {move_result[0]}")
+        print(f"Resultado del movimiento: {move_result}")
+        print(game._board.display_board())
 
         next_move = (
             game_pb2.GameMove(
@@ -77,7 +95,7 @@ def serve():
     game_pb2_grpc.add_GameServiceServicer_to_server(GameService(), server)
     server.add_insecure_port("[::]:50051")
     server.start()
-    print("Server started at port 50051 on localhost")
+    logger.info("Server started at port 50051 on localhost")
     server.wait_for_termination()
 
 

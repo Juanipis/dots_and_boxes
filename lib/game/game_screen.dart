@@ -1,3 +1,4 @@
+import 'package:dots_and_boxes/ai/service.dart';
 import 'package:dots_and_boxes/game/dots_boxes.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +21,7 @@ class _GameScreenState extends State<GameScreen> {
   late int player1Score;
   late int player2Score;
   late int currentPlayer;
+  GameClientService? gameService;
 
   @override
   void initState() {
@@ -27,6 +29,9 @@ class _GameScreenState extends State<GameScreen> {
     player1Score = 0;
     player2Score = 0;
     currentPlayer = 1;
+    if (widget.playAgainstAI) {
+      gameService = GameClientService();
+    }
   }
 
   void _updateScore(int player, int points) {
@@ -80,7 +85,10 @@ class _GameScreenState extends State<GameScreen> {
               children: [
                 Text('Player 1: $player1Score',
                     style: const TextStyle(fontSize: 18, color: Colors.blue)),
-                Text('Player 2: $player2Score',
+                Text(
+                    widget.playAgainstAI
+                        ? 'AI: $player2Score'
+                        : 'Player 2: $player2Score',
                     style: const TextStyle(fontSize: 18, color: Colors.red)),
               ],
             ),
@@ -90,6 +98,8 @@ class _GameScreenState extends State<GameScreen> {
               rows: widget.rows,
               columns: widget.columns,
               onScoreUpdate: _updateScore,
+              playAgainstAI: widget.playAgainstAI,
+              gameClientService: gameService,
             ),
           ),
         ],

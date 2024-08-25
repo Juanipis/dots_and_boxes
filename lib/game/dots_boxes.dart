@@ -1,15 +1,23 @@
+import 'dart:math';
+
+import 'package:dots_and_boxes/ai/service.dart';
+import 'package:dots_and_boxes/src/generated/game.pb.dart';
 import 'package:flutter/material.dart';
 
 class DotsAndBoxesBoard extends StatefulWidget {
   final int rows;
   final int columns;
   final Function(int player, int points) onScoreUpdate;
+  final bool playAgainstAI;
+  final GameClientService? gameClientService;
 
   const DotsAndBoxesBoard({
     super.key,
     required this.rows,
     required this.columns,
     required this.onScoreUpdate,
+    this.playAgainstAI = false,
+    this.gameClientService,
   });
 
   @override
@@ -21,6 +29,8 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
   late List<List<int>> verticalLines;
   late List<List<int>> boxes;
   int currentPlayer = 1;
+  bool isGameInitialized = false;
+  bool isAIProcessing = false;
 
   // Definimos los colores de los jugadores
   final Color player1Color = Colors.blue;
@@ -68,6 +78,11 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
                 ],
               ),
           ],
+          if (isAIProcessing)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(),
+            ),
         ],
       ),
     );
@@ -124,7 +139,8 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
     );
   }
 
-  void _handleLineClick(int row, int col, bool isHorizontal) {
+  Future<void> _handleLineClick(int row, int col, bool isHorizontal) async {
+    if (isAIProcessing) return;
     setState(() {
       if (isHorizontal) {
         if (horizontalLines[row][col] == 0) {
@@ -143,6 +159,107 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
       bool boxCompleted = _checkBoxCompletion(row, col, isHorizontal);
       if (!boxCompleted) {
         currentPlayer = 3 - currentPlayer; // Cambia entre 1 y 2
+      }
+    });
+
+    if (widget.playAgainstAI) {
+      int originX, originY, destX, destY;
+      if (isHorizontal) {
+        originX = col;
+        originY = row;
+        destX = col + 1;
+        destY = row;
+      } else {
+        originX = col;
+        originY = row;
+        destX = col;
+        destY = row + 1;
+      }
+      setState(() {
+        isAIProcessing = true;
+      });
+      if (!isGameInitialized) {
+        await _initializeAIGame(originX, originY, destX, destY);
+        setState(() {
+          isAIProcessing = false;
+        });
+      } else if (currentPlayer == 2) {
+        await _makeAIMove(originX, originY, destX, destY);
+        setState(() {
+          isAIProcessing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _initializeAIGame(int originX, originY, destX, destY) async {
+    if (widget.gameClientService == null) return;
+
+    final firstMove = GameMove(
+        originX: originX, originY: originY, destX: destX, destY: destY);
+
+    try {
+      final response = await widget.gameClientService!.initializeGame(
+        widget.rows,
+        widget.columns,
+        3, // Nivel de dificultad, puedes ajustarlo según sea necesario
+        firstMove,
+      );
+
+      if (response.status == 'continue') {
+        isGameInitialized = true;
+        _applyAIMove(response.nextMove);
+      } else if (response.status == 'game_over') {
+        // Manejar el fin del juego
+      }
+    } catch (e) {
+      print('Error al inicializar el juego con la IA: $e');
+    }
+  }
+
+  Future<void> _makeAIMove(int originX, originY, destX, destY) async {
+    if (widget.gameClientService == null) return;
+
+    final move = GameMove(
+        originX: originX, originY: originY, destX: destX, destY: destY);
+
+    try {
+      final response = await widget.gameClientService!.makeMove(move);
+      if (response.status == 'continue') {
+        _applyAIMove(response.nextMove);
+      } else if (response.status == 'game_over') {
+        // Manejar el fin del juego
+      }
+    } catch (e) {
+      print('Error al hacer el movimiento de la IA: $e');
+    }
+  }
+
+  void _applyAIMove(GameMove aiMove) {
+    setState(() {
+      // Determinar si el movimiento es horizontal basado en si las coordenadas Y son iguales
+      final isHorizontal = aiMove.originY == aiMove.destY;
+
+      // Asignar 'row' y 'col' basados en si es un movimiento horizontal o vertical
+      final row =
+          isHorizontal ? aiMove.originY : min(aiMove.originY, aiMove.destY);
+      final col =
+          isHorizontal ? min(aiMove.originX, aiMove.destX) : aiMove.originX;
+
+      // Aplicar el movimiento en el array adecuado
+      if (isHorizontal) {
+        horizontalLines[row][col] =
+            2; // Asigna al jugador AI en las líneas horizontales
+      } else {
+        verticalLines[row][col] =
+            2; // Asigna al jugador AI en las líneas verticales
+      }
+
+      // Verificar si la adición de esta línea completa una caja
+      bool boxCompleted = _checkBoxCompletion(row, col, isHorizontal);
+      if (!boxCompleted) {
+        currentPlayer =
+            1; // Cambiar el turno al jugador humano si no se completa una caja
       }
     });
   }
