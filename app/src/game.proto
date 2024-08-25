@@ -1,0 +1,32 @@
+// game.proto
+
+syntax = "proto3";
+
+package game;
+
+// Definición de mensajes
+message GameSetup {
+  int32 rows = 1;
+  int32 cols = 2;
+  int32 level = 3;
+  GameMove first_move = 4;
+}
+
+message GameMove {
+  int32 origin_x = 1;
+  int32 origin_y = 2;
+  int32 dest_x = 3;
+  int32 dest_y = 4;
+}
+
+message MoveResponse {
+  string status = 1;
+  string message = 2;
+  GameMove next_move = 3;
+}
+
+// Definición del servicio
+service GameService {
+  rpc StartGame (GameSetup) returns (MoveResponse);
+  rpc MakeMove (GameMove) returns (MoveResponse);
+}
