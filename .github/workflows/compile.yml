@@ -6,19 +6,21 @@ on:
       - master
 
 jobs:
-  create-tag-and-release:
+  create-tag:
     runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.set_tag.outputs.tag_name }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Set up Git
         run: |
-            git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git config --global user.name "GitHub Actions"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
 
       - name: Get the latest tag
-        id: get_tag
+        id: set_tag
         run: |
           # Obtén el último tag
           git fetch --tags
@@ -32,11 +34,19 @@ jobs:
           fi
           echo "New tag: $new_tag"
           echo "tag_name=$new_tag" >> $GITHUB_ENV
+          echo "::set-output name=tag_name::$new_tag"
 
       - name: Create a new tag
         run: |
           git tag ${{ env.tag_name }}
           git push origin ${{ env.tag_name }}
+
+  build-linux:
+    runs-on: ubuntu-latest
+    needs: create-tag
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -62,14 +72,51 @@ jobs:
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          filename: DotsAndBoxes-${{ env.tag_name }}-linux.zip
+          filename: DotsAndBoxes-${{ needs.create-tag.outputs.tag_name }}-linux.zip
           directory: build/linux/x64/release/bundle
 
-      - name: Create GitHub Release
+      - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.tag_name }}
-          name: "Release ${{ env.tag_name }}"
-          files: build/linux/x64/release/bundle/DotsAndBoxes-${{ env.tag_name }}-linux.zip
+          tag_name: ${{ needs.create-tag.outputs.tag_name }}
+          name: "Release ${{ needs.create-tag.outputs.tag_name }}"
+          files: build/linux/x64/release/bundle/DotsAndBoxes-${{ needs.create-tag.outputs.tag_name }}-linux.zip
+
+  build-windows:
+    runs-on: windows-latest
+    needs: create-tag
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.22.2'
+
+      - name: Install project dependencies
+        run: flutter pub get
+
+      - name: Enable windows build
+        run: flutter config --enable-windows-desktop
+
+      - name: Build artifacts
+        run: flutter build windows --release
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@master
+        with:
+          type: 'zip'
+          filename: DotsAndBoxes-${{ needs.create-tag.outputs.tag_name }}-windows.zip
+          directory: build/windows/x64/runner/Release
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.create-tag.outputs.tag_name }}
+          files: build/windows/runner/Release/DotsAndBoxes-${{ needs.create-tag.outputs.tag_name }}-windows.zip
