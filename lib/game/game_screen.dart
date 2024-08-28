@@ -27,10 +27,11 @@ class _GameScreenState extends State<GameScreen> {
   late int player2Score;
   late int currentPlayer;
   GameClientService? gameService;
-  final player = AudioPlayer();
+  final AudioPlayer player = AudioPlayer();
   String winP1 = 'audio/win.wav';
   String winP2 = 'audio/win2.wav';
   String winAI = 'audio/lose.wav';
+  String backgroundMusic = 'audio/game_music.mp3'; // Tu canción de fondo
 
   @override
   void initState() {
@@ -38,6 +39,8 @@ class _GameScreenState extends State<GameScreen> {
     player1Score = 0;
     player2Score = 0;
     currentPlayer = 1;
+
+    // Inicializar el servicio de juego si se juega contra la IA
     if (widget.playAgainstAI) {
       gameService = GameClientService();
     }
@@ -117,14 +120,24 @@ class _GameScreenState extends State<GameScreen> {
             ),
           ),
           Expanded(
-            child: DotsAndBoxesBoard(
-              rows: widget.rows,
-              columns: widget.columns,
-              onScoreUpdate: _updateScore,
-              playAgainstAI: widget.playAgainstAI,
-              gameClientService: gameService,
-              difficulty: widget.difficulty,
-              alfaBetaPruning: widget.alfaBetaPruning,
+            child: Center(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: FittedBox(
+                    child: DotsAndBoxesBoard(
+                      rows: widget.rows,
+                      columns: widget.columns,
+                      onScoreUpdate: _updateScore,
+                      playAgainstAI: widget.playAgainstAI,
+                      gameClientService: gameService,
+                      difficulty: widget.difficulty,
+                      alfaBetaPruning: widget.alfaBetaPruning,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],

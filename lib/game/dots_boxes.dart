@@ -37,9 +37,25 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
   bool isGameInitialized = false;
   bool isAIProcessing = false;
   final player = AudioPlayer();
-  String p1_sound = 'audio/p1.wav';
-  String p2_sound = 'audio/p2.wav';
-  String ai_sound = 'audio/ai.wav';
+  String p1Sound = 'audio/p1.wav';
+  String p2Sound = 'audio/p2.wav';
+  String aiSound = 'audio/ai.wav';
+
+  // Tamaño aumentado para los puntos
+  final double widthDot = 20; // Aumentado de 12 a 20
+  final double heightDot = 20; // Aumentado de 12 a 20
+
+// Tamaño aumentado para las líneas horizontales
+  final double widthHorizontalLine = 80; // Aumentado de 50 a 80
+  final double heightHorizontalLine = 12; // Aumentado de 8 a 12
+
+// Tamaño aumentado para las líneas verticales
+  final double widthVerticalLine = 12; // Aumentado de 8 a 12
+  final double heightVerticalLine = 80; // Aumentado de 50 a 80
+
+// Tamaño aumentado para los cuadros
+  final double widthBox = 80; // Aumentado de 50 a 80
+  final double heightBox = 80; // Aumentado de 50 a 80
 
   // Definimos los colores de los jugadores
   final Color player1Color = Colors.blue;
@@ -99,8 +115,8 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
 
   Widget _buildDot() {
     return Container(
-      width: 10,
-      height: 10,
+      width: widthDot,
+      height: heightDot,
       decoration: const BoxDecoration(
         color: Colors.black,
         shape: BoxShape.circle,
@@ -112,8 +128,8 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
     return GestureDetector(
       onTap: () => _handleLineClick(row, col, true),
       child: Container(
-        width: 40,
-        height: 10,
+        width: widthHorizontalLine,
+        height: heightHorizontalLine,
         color: _getLineColor(horizontalLines[row][col]),
       ),
     );
@@ -123,8 +139,11 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
     return GestureDetector(
       onTap: () => _handleLineClick(row, col, false),
       child: Container(
-        width: 10,
-        height: 40,
+        margin: EdgeInsets.symmetric(
+            horizontal: (widthDot / 2) -
+                (widthVerticalLine / 2)), // Ajusta la alineación horizontal
+        width: widthVerticalLine,
+        height: heightVerticalLine,
         color: _getLineColor(verticalLines[row][col]),
       ),
     );
@@ -138,8 +157,8 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
 
   Widget _buildBox(int row, int col) {
     return Container(
-      width: 40,
-      height: 40,
+      width: widthBox,
+      height: heightBox,
       color: boxes[row][col] == 1
           ? player1Color.withOpacity(0.3)
           : boxes[row][col] == 2
@@ -345,14 +364,14 @@ class _DotsAndBoxesBoardState extends State<DotsAndBoxesBoard> {
   }
 
   Future<void> playP1Sound() async {
-    await player.play(AssetSource(p1_sound));
+    await player.play(AssetSource(p1Sound), volume: 1.0);
   }
 
   Future<void> playP2Sound() async {
-    await player.play(AssetSource(p2_sound));
+    await player.play(AssetSource(p2Sound), volume: 1.0);
   }
 
   Future<void> playAiSound() async {
-    await player.play(AssetSource(ai_sound));
+    await player.play(AssetSource(aiSound), volume: 1.0);
   }
 }
