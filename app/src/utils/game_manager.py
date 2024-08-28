@@ -151,47 +151,32 @@ class GameManager:
         # print("No matching move found.")
         return None
 
-    def evaluate(self, state: Board) -> float:
+    def evaluate(self, state: Board):
         ai_score = state.ai_score
         player_score = state.player_score
 
-        total_lines = (state.m + 1) * state.n + state.m * (state.n + 1)
-        remaining_lines = len(state._open_vectors)
+    # Variables para prioridades
+        fill_box_bonus = 50  # Alto bono por completar una caja
+        avoid_empty_penalty = -100  # Alta penalización por dejar cajas vacías (con tres lados cerrados)
+        safe_move_bonus = 10  # Bono por hacer movimientos seguros que no abren cajas para el oponente
 
-        # Determinar la etapa del juego
-        if remaining_lines > total_lines * 0.66:
-            game_stage = "early"
-        elif remaining_lines > total_lines * 0.33:
-            game_stage = "mid"
-        else:
-            game_stage = "late"
-
-        long_chains = 0
-
-        # Analizar líneas y detectar cadenas
-        chains = self._detect_chains(state)
-
-        for chain in chains:
-            if len(chain) >= 3:
-                long_chains += 1
-
-        # Evaluar el valor heurístico según la etapa del juego
         heuristic_value = ai_score - player_score
 
-        if game_stage == "early":
-            heuristic_value -= (
-                long_chains * 15
-            )  # Penaliza fuertemente cadenas largas en el inicio
-        elif game_stage == "mid":
-            heuristic_value -= (
-                long_chains * 10
-            )  # Penaliza pero menos en la mitad del juego
-        else:
-            heuristic_value += (
-                len(chains) - long_chains
-            ) * 5  # Valora cerrar cadenas si están disponibles
+        for i in range(state.m):
+            for j in range(state.n):
+                box = state._boxes[i][j]
+                sides_closed = sum([box._top, box._left, box._right, box._bottom])
+
+                if sides_closed == 4:
+                    heuristic_value += fill_box_bonus  # Alto bono por completar una caja
+                elif sides_closed == 3:
+                    heuristic_value += avoid_empty_penalty  # Penalización por dejar cajas vacías
+                elif sides_closed < 2:
+                    heuristic_value += safe_move_bonus  # Bono por hacer movimientos seguros
 
         return heuristic_value
+
+
 
     def _detect_chains(self, state: Board):
         chains = []
