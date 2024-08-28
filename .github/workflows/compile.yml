@@ -1,12 +1,12 @@
 name: Flutter CI
 
-"on":
+on:
   push:
     branches:
       - master
 
 jobs:
-  build-and-release-linux:
+  build-and-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,58 +15,35 @@ jobs:
         with:
           channel: 'stable'
           flutter-version: '3.22.2'
+
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libunwind-dev
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+
       - name: Install project dependencies
         run: flutter pub get
+
       - name: Enable linux build
         run: flutter config --enable-linux-desktop
+
       - name: Build artifacts
         run: flutter build linux --release
+
       - name: Archive Release
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          filename: DotsAndBoxes-${{github.ref_name}}-linux.zip
+          filename: DotsAndBoxes-${{ github.sha }}-linux.zip
           directory: build/linux/x64/release/bundle
-      - name: Linux Release
+
+      - name: Create Tag and Release
+        id: create_release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: build/linux/x64/release/bundle/DotsAndBoxes-${{github.ref_name}}-linux.zip
-
-  build-and-release-windows:
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version: '3.22.2'
-      - name: Install project dependencies
-        run: flutter pub get
-      - name: Enable windows build
-        run: flutter config --enable-windows-desktop
-      - name: Build artifacts
-        run: flutter build windows --release
-
-      - name: Archive Release
-        uses: thedoctor0/zip-release@master
-        with:
-          type: 'zip'
-          filename: DotsAndBoxes-${{github.ref_name}}-windows.zip
-          directory: build/windows/x64/runner/Release
-      - name: Windows Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: build/windows/runner/Release/DotsAndBoxes-${{github.ref_name}}-windows.zip
-
+          tag_name: "release-${{ github.sha }}"
+          name: "Release for commit ${{ github.sha }}"
+          files: build/linux/x64/release/bundle/DotsAndBoxes-${{ github.sha }}-linux.zip
