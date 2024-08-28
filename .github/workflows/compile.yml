@@ -119,4 +119,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ needs.create-tag.outputs.tag_name }}
-          files: build/windows/runner/Release/DotsAndBoxes-${{ needs.create-tag.outputs.tag_name }}-windows.zip
+          files: build/windows/x64/runner/Release/DotsAndBoxes-${{ needs.create-tag.outputs.tag_name }}-windows.zip
