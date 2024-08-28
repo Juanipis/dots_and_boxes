@@ -1,4 +1,4 @@
-from utils2.game_manager import GameManager
+from utils.game_manager import GameManager
 from concurrent import futures
 import grpc
 import game_pb2
