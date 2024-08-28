@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Optional
+from typing import Optional, Tuple
 from .board import Board
 
 
@@ -8,6 +8,7 @@ class GameManager:
         self._level = level
         self._board = Board(m, n)
         self.current_turn = "player"  # El turno inicial es del jugador
+        self.last_move = None
 
         if mode == "alphabeta":
             self._mode = self.alpha_beta
@@ -103,25 +104,20 @@ class GameManager:
         tuple[Optional[tuple[tuple[int, int], tuple[int, int]]], Optional[str]]
     ]:
         if is_simulation:
-            # Crear una copia del estado del tablero para simular
             simulated_board = deepcopy(self._board)
             eval, best_state = self._mode(simulated_board, self._level, True)
             return best_state
 
-        # Movimiento real de la IA
-        self.current_turn = "ai"  # Asegurarse de que es el turno de la IA
+        self.current_turn = "ai"
 
-        # Obtener el mejor movimiento y el mejor estado simulado
         eval, best_move = self._mode(self._board, self._level, True)
 
         if best_move is not None:
-            # Aplica el mejor movimiento en el tablero real
+            self.last_move = best_move
+
             closed_box_ai = self._board.move(
                 best_move, player_move=False, is_simulation=False
             )
-
-            # Después del movimiento, cambiar el turno al jugador
-            self.current_turn = "player"
 
             self._board.display_board()
             self._board.validate_board_state()
@@ -129,10 +125,15 @@ class GameManager:
 
             if closed_box_ai:
                 print("AI closed a box, gets another turn.")
-                if not self._board.has_moves():  # Corrected line
+                if not self._board.has_moves():
+                    self.current_turn = "player"
                     return (best_move, self.get_victor())
-                return None
 
+                # La IA tiene otro turno, por lo que retornamos None para continuar
+                return (best_move, None)
+
+            # Si la IA no cerró una caja, cambiamos el turno al jugador
+            self.current_turn = "player"
             return (best_move, None)
 
         return (None, None)
@@ -373,3 +374,34 @@ class GameManager:
                 break
 
         return (min_val, best_move)
+
+    def play(self, player_coordinates: Tuple[int, int]) -> list:
+        """
+        Método para manejar la secuencia de juego de un jugador humano y la IA.
+        :param player_coordinates: Las coordenadas del movimiento del jugador.
+        :return: Una lista de todos los movimientos realizados por la IA.
+        """
+        ai_moves = []
+
+        # El jugador hace su movimiento
+        result = self._player_move(player_coordinates)
+
+        # Si el jugador cierra una caja y tiene otro turno, devolver result como None
+        if result is not None and result[1] is not None:
+            return ai_moves
+
+        # Mientras sea el turno de la IA, esta jugará
+        while self.current_turn == "ai" and self._board.has_moves():
+            move, victor = self._ai_move() or (None, None)
+
+            if move is None and self.last_move is not None:
+                move = self.last_move
+
+            if move:
+                ai_moves.append(move)
+                self.last_move = None
+
+            if victor:  # Si el juego ha terminado
+                break
+
+        return ai_moves

@@ -1,9 +1,40 @@
+from utils2.game_manager import GameManager
 from concurrent import futures
 import grpc
 import game_pb2
 import game_pb2_grpc
-from utils.game_manager import GameManager
 from logzero import logger
+
+""" game_min = GameManager(3, 3, 3)
+move = game_min.play(((0, 0), (0, 1)))
+print(move)
+
+# mostramos el tablero
+game_min._board.display_board()
+
+print("-------------")
+
+
+# Hago un movimiento
+move = game_min.play(((0, 0), (1, 0)))
+print(move)
+
+
+# mostramos el tablero
+game_min._board.display_board()
+
+print("-------------")
+
+# Hago un movimiento
+move = game_min.play(((1, 0), (1, 1)))
+print(move)
+
+
+# mostramos el tablero
+game_min._board.display_board()
+
+print("-------------")
+ """
 
 
 class GameService(game_pb2_grpc.GameServiceServicer):
@@ -34,20 +65,14 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         # Ejecutar el primer movimiento
         origin = (request.first_move.origin_x, request.first_move.origin_y)
         dest = (request.first_move.dest_x, request.first_move.dest_y)
-        move_result = game.get_move(origin, dest)
+        ia_moves = game.play((origin, dest))
+        print(f"Tablero del juego {game_id}")
+        game._board.display_board()
+        print("-------------")
 
-        if move_result[1] is not None:
-            status = "game_over"
-            message = move_result[1]
-        else:
-            status = "continue"
-            message = f"Movimiento de la máquina: {move_result[0]}"
-
-        print(f"Movimiento del jugador: {origin} -> {dest}")
-        # Imprimamos todos los movimientos de la IA
         next_moves = []
         print("Movimientos de la IA:")
-        for i in move_result[0]:
+        for i in ia_moves:
             print(f"    Movimiento de la máquina: {i}")
             next_moves.append(
                 game_pb2.GameMove(
@@ -57,13 +82,9 @@ class GameService(game_pb2_grpc.GameServiceServicer):
                     dest_y=i[1][1],
                 )
             )
-        print(f"Resultado del movimiento: {move_result}")
-
-        print(game._board.display_board())
-        # Se devuelven todos los movimientos de la IA.
 
         return game_pb2.MoveResponse(
-            status=status, message=message, next_move=next_moves
+            status="continue", message="Akiladooos", next_move=next_moves
         )
 
     def MakeMove(self, request, context):
@@ -72,19 +93,14 @@ class GameService(game_pb2_grpc.GameServiceServicer):
 
         origin = (request.origin_x, request.origin_y)
         dest = (request.dest_x, request.dest_y)
-        move_result = game.get_move(origin, dest)
+        ia_moves = game.play((origin, dest))
 
-        if move_result[1] is not None:
-            status = "game_over"
-            message = move_result[1]
-        else:
-            status = "continue"
-            message = "Movimiento de la máquina: {}".format(move_result[0])
-        print(f"Movimiento del jugador: {origin} -> {dest}")
-        print("Movimientos de la IA:")
+        print(f"Tablero del juego {game_id}")
+        game._board.display_board()
+        print("-------------")
         next_moves = []
-        if move_result[0] is not None:
-            for i in move_result[0]:
+        if ia_moves is not None:
+            for i in ia_moves:
                 print(f"    Movimiento de la máquina: {i}")
                 next_moves.append(
                     game_pb2.GameMove(
@@ -94,11 +110,11 @@ class GameService(game_pb2_grpc.GameServiceServicer):
                         dest_y=i[1][1],
                     )
                 )
-        print(f"Resultado del movimiento: {move_result}")
-        print(game._board.display_board())
 
         return game_pb2.MoveResponse(
-            status=status, message=message, next_move=next_moves
+            status="continue",
+            message="Hoy me desperte con ganas de",
+            next_move=next_moves,
         )
 
 

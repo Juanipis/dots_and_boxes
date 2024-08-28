@@ -51,17 +51,7 @@ class _GameScreenState extends State<GameScreen> {
         player2Score += points;
       }
 
-      int totalSquares = widget.rows * widget.columns;
-      int remainingSquares = totalSquares - (player1Score + player2Score);
-
-      // Calcular la puntuación máxima posible del otro jugador si tomara todos los cuadros restantes
-      int maxPossibleScoreForPlayer2 = player2Score + remainingSquares;
-      int maxPossibleScoreForPlayer1 = player1Score + remainingSquares;
-
-      if (player1Score > maxPossibleScoreForPlayer2 ||
-          player2Score > maxPossibleScoreForPlayer1) {
-        _showWinner();
-      } else if (player1Score + player2Score == totalSquares) {
+      if (player1Score + player2Score == widget.rows * widget.columns) {
         _showWinner();
       }
     });
