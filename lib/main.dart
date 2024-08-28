@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:dots_and_boxes/game/game_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -33,6 +34,30 @@ class _HomeScreenState extends State<HomeScreen> {
   bool playAgainstAI = false;
   int difficulty = 3;
   bool alfaBetaPruning = false;
+  final AudioPlayer player = AudioPlayer();
+  final String lobbyMusic = 'audio/lobby.mp3';
+
+  @override
+  void initState() {
+    super.initState();
+    _playBackgroundMusic();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    player.dispose();
+  }
+
+  void _playBackgroundMusic() async {
+    await player.setReleaseMode(
+        ReleaseMode.loop); // Configura el modo de repetición continua
+    await player
+        .setSource(AssetSource(lobbyMusic)); // Establece la fuente de audio
+    await player.setVolume(
+        0.3); // Ajusta el volumen (0.0 a 1.0), 0.3 es un volumen bajo
+    await player.resume(); // Reproduce la música
+  }
 
   @override
   Widget build(BuildContext context) {
