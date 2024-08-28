@@ -6,12 +6,40 @@ on:
       - master
 
 jobs:
-  build-and-release:
+  create-tag-and-release:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+            git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config --global user.name "GitHub Actions"
+
+      - name: Get the latest tag
+        id: get_tag
+        run: |
+          # Obtén el último tag
+          git fetch --tags
+          latest_tag=$(git tag --sort=-v:refname | head -n 1)
+          echo "Latest tag: $latest_tag"
+          # Incrementa el número de versión
+          if [ -z "$latest_tag" ]; then
+            new_tag="v1.0.0"
+          else
+            new_tag=$(echo $latest_tag | awk -F. '{print $1 "." $2 "." $3+1}')
+          fi
+          echo "New tag: $new_tag"
+          echo "tag_name=$new_tag" >> $GITHUB_ENV
+
+      - name: Create a new tag
+        run: |
+          git tag ${{ env.tag_name }}
+          git push origin ${{ env.tag_name }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           flutter-version: '3.22.2'
@@ -19,8 +47,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libunwind-dev
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+          sudo apt-get install -y libunwind-dev clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
 
       - name: Install project dependencies
         run: flutter pub get
@@ -35,15 +62,14 @@ jobs:
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          filename: DotsAndBoxes-${{ github.sha }}-linux.zip
+          filename: DotsAndBoxes-${{ env.tag_name }}-linux.zip
           directory: build/linux/x64/release/bundle
 
-      - name: Create Tag and Release
-        id: create_release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "release-${{ github.sha }}"
-          name: "Release for commit ${{ github.sha }}"
-          files: build/linux/x64/release/bundle/DotsAndBoxes-${{ github.sha }}-linux.zip
+          tag_name: ${{ env.tag_name }}
+          name: "Release ${{ env.tag_name }}"
+          files: build/linux/x64/release/bundle/DotsAndBoxes-${{ env.tag_name }}-linux.zip
