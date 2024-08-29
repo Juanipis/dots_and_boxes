@@ -82,7 +82,7 @@ class GameManager:
         # Después del movimiento real del jugador, cambiar el turno a la IA solo si no se cerró una caja
         self.current_turn = "ai"
 
-        self._board.display_board()  # Mostrar el estado del tablero después del movimiento del jugador
+        # self._board.display_board()  # Mostrar el estado del tablero después del movimiento del jugador
         self._board.validate_board_state()  # Verificar consistencia del estado del tablero
         self._board.print_board_summary()  # Imprimir resumen del estado del tablero
 
@@ -115,8 +115,8 @@ class GameManager:
             # Aplica solo el mejor movimiento en el tablero real (tablero del nivel actual)
             closed_box_ai = self._board.move(best_move, player_move=False, is_simulation=False)
             
-            self._board.display_board()
-            self._board.validate_board_state()
+            #self._board.display_board()
+            #self._board.validate_board_state()
             self._board.print_board_summary()
 
             if closed_box_ai:
