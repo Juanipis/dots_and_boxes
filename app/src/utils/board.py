@@ -210,6 +210,7 @@ class Board:
                             )
 
     def print_board_summary(self):
-        print(f"Player Score: {self.player_score}, AI Score: {self.ai_score}")
-        print(f"Open vectors: {self._open_vectors}")
-        print(f"Moves made: {self._moves}")
+        #print(f"Player Score: {self.player_score}, AI Score: {self.ai_score}")
+        #print(f"Open vectors: {self._open_vectors}")
+        #print(f"Moves made: {self._moves}")
+        pass

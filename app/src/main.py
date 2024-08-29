@@ -66,14 +66,14 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         origin = (request.first_move.origin_x, request.first_move.origin_y)
         dest = (request.first_move.dest_x, request.first_move.dest_y)
         ia_moves = game.play((origin, dest))
-        print(f"Tablero del juego {game_id}")
-        game._board.display_board()
-        print("-------------")
+        #print(f"Tablero del juego {game_id}")
+        #game._board.display_board()
+        #print("-------------")
 
         next_moves = []
-        print("Movimientos de la IA:")
+        #print("Movimientos de la IA:")
         for i in ia_moves:
-            print(f"    Movimiento de la máquina: {i}")
+            
             next_moves.append(
                 game_pb2.GameMove(
                     origin_x=i[0][0],
@@ -95,13 +95,13 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         dest = (request.dest_x, request.dest_y)
         ia_moves = game.play((origin, dest))
 
-        print(f"Tablero del juego {game_id}")
-        game._board.display_board()
-        print("-------------")
+        #print(f"Tablero del juego {game_id}")
+        #game._board.display_board()
+        #print("-------------")
         next_moves = []
         if ia_moves is not None:
             for i in ia_moves:
-                print(f"    Movimiento de la máquina: {i}")
+                #print(f"    Movimiento de la máquina: {i}")
                 next_moves.append(
                     game_pb2.GameMove(
                         origin_x=i[0][0],
